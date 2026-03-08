@@ -26,6 +26,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 10px;
         }
 
         #game-wrapper {
@@ -35,11 +36,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             border: 2px solid #8b4513;
             border-radius: 8px;
-            min-height: 600px;
+            min-height: 85vh;
             position: relative;
             display: flex;
             flex-direction: column;
             padding: 30px;
+            margin: auto;
         }
 
         .header {
@@ -220,7 +222,7 @@
 
     <!-- Screen: Teacher Dashboard -->
     <div class="screen" id="scr-admin">
-        <h3>לוח בקרה למורה - דוח ציונים</h3>
+        <h3>דוח ציוני כיתה</h3>
         <div id="admin-results" style="max-height: 350px; overflow-y: auto; margin-bottom: 10px;">טוען נתונים...</div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn" style="width:auto; flex:1" onclick="refreshScores()">רענן רשימה</button>
@@ -229,7 +231,7 @@
         </div>
     </div>
 
-    <div class="teacher-gate" onclick="openAdmin()">לוח מורה</div>
+    <div class="teacher-gate" id="teacher-trigger">לוח מורה</div>
 </div>
 
 <!-- Firebase Integration -->
@@ -251,7 +253,7 @@
     let selections = {};
     let allGrades = [];
 
-    // Mandatory Rule 3: Auth Before Queries
+    // Auth Initialization
     const initAuth = async () => {
         try {
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -275,6 +277,7 @@
 
     initAuth();
 
+    // Export functions to window
     window.showScreen = (id) => {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -380,7 +383,10 @@
     };
 
     window.refreshScores = async () => {
-        if (!currentUser) return;
+        if (!currentUser) {
+            alert("עדיין לא נוצר חיבור לענן. המתן מספר שניות.");
+            return;
+        }
         const div = document.getElementById('admin-results');
         div.innerHTML = "טוען נתונים מהענן...";
         try {
@@ -388,7 +394,6 @@
             let data = [];
             snap.forEach(d => data.push(d.data()));
             
-            // Sort in JS memory as per Rule 2
             data.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             allGrades = data;
             
@@ -432,6 +437,9 @@
         link.click();
         document.body.removeChild(link);
     };
+
+    // Attach trigger manually just in case
+    document.getElementById('teacher-trigger').onclick = window.openAdmin;
 
 </script>
 </body>
